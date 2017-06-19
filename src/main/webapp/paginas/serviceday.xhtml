@@ -1,0 +1,105 @@
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml"
+	xmlns:h="http://java.sun.com/jsf/html"
+	xmlns:f="http://java.sun.com/jsf/core">
+	
+	
+<style>	
+#demo-table-porcents {
+    border-collapse: collapse;
+    width: 40%;
+    tr:nth-child(even){background-color: #f2f2f2}
+    th, td {
+    text-align: left;
+    padding: 8px;
+	}
+	th {background-color: black;color: white;}
+}
+
+#demo-table-requests {
+    border-collapse: collapse;
+    width: 50%;
+    tr:nth-child(even){background-color: #f2f2f2}
+    th, td {
+    text-align: left;
+    padding: 8px;
+	}
+	th {background-color: black;color: white;}
+}
+</style>	
+
+
+<h:head>
+	<h:title value="HISTORICO DE REQUISICOES" />
+</h:head>
+<h:body>
+
+	<h:outputLink value="services.xhtml">
+		<f:param name="inicio" value="0" />
+		<img src="home.png" />
+	</h:outputLink>
+
+	<br />
+	<br />
+	
+	<h:outputText value = "ID: #{serviceJSFBean.serviceHistoric[0].idService}" /> 
+	<br />
+	<h:outputText value = "DATA: #{serviceJSFBean.serviceHistoric[0].dataBR}" />
+	<br />
+	
+	<br />
+
+
+	<h:dataTable var="n" value="#{serviceJSFBean.estatisticas.respostas}"
+						id="demo-table-porcents"
+		  				border="1" cellpadding="3" cellspacing="1" rules="rows" frame="box"
+		  				style="text-align:center; font-size:15; border-style:solid; tr:nth-child(even){background-color: #f2f2f2}; th {background-color: black;color: white;}"
+		  				width="50%">
+		<h:column>
+			<f:facet name="header" style="font-weight:bold text-align:center;">Response Code</f:facet>
+    				
+    		<h:outputLink value="servicedayresponse.xhtml">
+							<f:param name="id" value="#{serviceJSFBean.id}" />
+							<f:param name="date" value="#{serviceJSFBean.date}" />
+							<f:param name="response" value="#{n.response}" />
+							<h:outputText value="#{n.response}" />
+			</h:outputLink>
+		</h:column>
+		<h:column>
+			<f:facet name="header" style="font-weight:bold text-align:center;">Mensagem</f:facet>
+    				#{n.details}
+		</h:column>
+		<h:column>
+			<f:facet name="header" style="font-weight:bold text-align:center;">%</f:facet>
+    				#{n.porcentagem}
+		</h:column>
+		<h:column>
+			<f:facet name="header" style="font-weight:bold text-align:center;">Quantidade</f:facet>
+    				#{n.qtd}
+		</h:column>
+	</h:dataTable>
+	
+	<br />
+	<br />
+	
+	
+	<h:outputText value = "TOTAL DE REQUISICOES: #{serviceJSFBean.estatisticas.qtdRequisicoes}" />
+	<br />
+	<br />
+	<h:dataTable var="n" value="#{serviceJSFBean.serviceHistoric}"
+						id="demo-table-requests"
+		  				border="1" cellpadding="3" cellspacing="1" rules="rows" frame="box"
+		  				style="text-align:center; font-size:15; border-style:solid; tr:nth-child(even){background-color: #f2f2f2}; th {background-color: black;color: white;}"
+		  				width="50%">
+		<h:column rendered="#{!empty serviceJSFBean.serviceHistoric}">
+			<f:facet name="header" style="font-weight:bold text-align:center;"><img src="response32.png"></img></f:facet>
+    				#{n.details}
+			  </h:column>
+		<h:column rendered="#{!empty serviceJSFBean.serviceHistoric}">
+			<f:facet name="header">
+				<img src="time32.png"></img>
+			</f:facet>
+    				#{n.timeString}
+			  </h:column>
+	</h:dataTable>
+</h:body>
+</html>

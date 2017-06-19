@@ -1,0 +1,42 @@
+<html lang="en"
+      xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core">
+      <h:head>
+      	<h:title value="HISTORICO DE REQUISICOES"/>
+      	<script type="text/javascript">
+  		setTimeout(function () { location.reload(true); }, 30000);
+		</script>
+      </h:head>
+	<h:body>
+		  		
+		  		
+		  
+		 <br />
+		 <h:dataTable var="n" value="#{requisicaoJSFBean.allHistorics}" 
+		  				id="demo-table"
+		  				border="1" cellpadding="3" cellspacing="1" rules="rows" frame="box"
+		  				rendered="#{!empty requisicaoJSFBean.allHistorics}" 
+		  				style="valign:middle; font-size:17; border-style:solid; tr:nth-child(even){background-color: #f2f2f2}; th {background-color: black;color: white;}"
+		  				width="55%">
+		  	
+			  <h:column rendered="#{!empty requisicaoJSFBean.allHistorics}">
+			    	<f:facet name="header" style="font-weight:bold text-align:left;" >Remaining Services</f:facet>
+    				<img src="#{n.img}"></img>
+    				    #{n.service.name}
+			  </h:column>
+			  <h:column rendered="#{!empty requisicaoJSFBean.allHistorics}">
+			    	<f:facet name="header" style="font-weight:bold text-align:left;">Details</f:facet>
+    				#{n.details}
+			  </h:column>
+			  <h:column rendered="#{!empty requisicaoJSFBean.allHistorics}">
+			    	<f:facet name="header">Time</f:facet>
+    				#{n.time}
+			  </h:column>
+			  
+			 
+		</h:dataTable>	  
+		
+		   
+	</h:body>
+</html>
