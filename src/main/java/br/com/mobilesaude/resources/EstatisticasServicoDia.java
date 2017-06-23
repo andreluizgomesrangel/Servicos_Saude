@@ -23,9 +23,10 @@ public class EstatisticasServicoDia {
 	@XmlElementWrapper(name = "Requisicoes")
 	@XmlElement(name = "Requisicao")
 	private List<Requisicao> Requisicoes = new ArrayList<Requisicao>();
-
+	private int qtdRequisicoes;
+	
 	public EstatisticasServicoDia() {
-
+		this.qtdRequisicoes = Requisicoes.size();
 	}
 
 	public EstatisticasServicoDia(long id, String dia) {
@@ -72,6 +73,14 @@ public class EstatisticasServicoDia {
 	public String toString() {
 		return "id: " + idService + " dia:" + dia + " qtdRespostas:" + Respostas.size() + " qtdRequisicoes: "
 				+ Requisicoes.size();
+	}
+
+	public int getQtdRequisicoes() {
+		return qtdRequisicoes;
+	}
+
+	public void setQtdRequisicoes(int qtdRequisicoes) {
+		this.qtdRequisicoes = qtdRequisicoes;
 	}
 
 }

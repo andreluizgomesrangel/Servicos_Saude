@@ -9,6 +9,7 @@ import java.util.List;
 import javax.annotation.Resource;
 import javax.ejb.EJB;
 import javax.ejb.Stateless;
+import javax.enterprise.context.Dependent;
 import javax.inject.Inject;
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
@@ -239,7 +240,9 @@ public class RequisicaoDao {
 				r.setResponse(rs.getInt("RCODE"));
 				Timestamp timestamp = rs.getTimestamp("HORA");
 				java.util.Date date = timestamp;
-				r.setHora(date);
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(date);
+				r.setHora(cal);
 				req.add(r);
 			}
 			rs.close();

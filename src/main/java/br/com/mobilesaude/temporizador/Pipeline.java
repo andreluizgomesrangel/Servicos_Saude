@@ -19,29 +19,22 @@ public class Pipeline implements Runnable {
 	@Override
 	public void run() {
 		// TODO Auto-generated method stub
-		//System.out.println(">>>> run");
-		//System.out.println("executar pipeline service: " + s.getId());
 		clienteRequisicao.newRequest(s);
-
 	}
 
 	public Service getS() {
-		//System.out.println(">>>> getS");
 		return s;
 	}
 
 	public void setS(Service s) {
-		//System.out.println(">>>> SET service: " + s.getName());
 		this.s = s;
 	}
 
 	public Requisicoes getClienteRequisicao() {
-		//System.out.println(">>>> getClienteRequisicao()");
 		return clienteRequisicao;
 	}
 
 	public void setClienteRequisicao(Requisicoes clienteRequisicao) {
-		//System.out.println(">>>> setClienteRequisicao");
 		this.clienteRequisicao = clienteRequisicao;
 	}
 

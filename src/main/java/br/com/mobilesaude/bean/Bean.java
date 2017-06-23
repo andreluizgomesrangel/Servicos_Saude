@@ -6,47 +6,44 @@ import java.util.List;
 import javax.ejb.EJB;
 import javax.enterprise.context.RequestScoped;
 import javax.faces.bean.ManagedBean;
-import javax.inject.Inject;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
-import br.com.mobilesaude.dao.RequisicaoDao;
-import br.com.mobilesaude.dao.Teste;
+import br.com.mobilesaude.connection.DBConnection;
 import br.com.mobilesaude.resources.LastRequest;
 
 @ManagedBean
 @RequestScoped
 public class Bean {
 
-	@EJB
-	RequisicaoDao rdao;
+	DBConnection DB;
 
-	@Inject
-	Teste teste;
-	
 	List<LastRequest> lastRequests = new ArrayList<LastRequest>();
-	// CRequisicao cr = new CRequisicao();
 
 	public Bean() {
 		System.out.println(">>>>>>>>>>>>>>>>>>> Bean");
-		
-		// lastRequests = cr.getLastOnes();
-//		lastRequests = rdao.getLastRequests();
-		teste.teste();
+		DB = (DBConnection) lookup(null);
+		DB.setLists();
+		lastRequests = DB.getLastRequests();
 	}
 
+	public Object lookup(Class<?> clazz) {
+        InitialContext context;
+        try {
+            context = new InitialContext();
+            return context.lookup("java:global/Servicos_Saude/DBConnection");
+        } catch (NamingException e) {
+            e.printStackTrace();
+            throw new RuntimeException("Erro na busca do EJB");
+        }
+    }
+	
 	public List<LastRequest> getLastRequests() {
 		return lastRequests;
 	}
 
 	public void setLastRequests(List<LastRequest> lastRequests) {
 		this.lastRequests = lastRequests;
-	}
-
-	public RequisicaoDao getRdao() {
-		return rdao;
-	}
-
-	public void setRdao(RequisicaoDao rdao) {
-		this.rdao = rdao;
 	}
 
 }

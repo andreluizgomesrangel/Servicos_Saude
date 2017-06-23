@@ -40,7 +40,6 @@ public class Requisicoes {
 			builder.add(entry.getKey(), entry.getValue());
 		}
 		RequestBody formBody = builder.build();
-		// System.out.print( " post waiting..." );
 		Request request = new Request.Builder().url(s.getUrl()).post(formBody).build();
 
 		Resposta resposta = new Resposta();

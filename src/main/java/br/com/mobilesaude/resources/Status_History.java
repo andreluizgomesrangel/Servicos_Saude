@@ -9,11 +9,14 @@ import java.util.Date;
 import java.util.List;
 
 import javax.ejb.EJB;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import br.com.mobilesaude.connection.DBConnection;
 import br.com.mobilesaude.dao.RequisicaoDao;
 import br.com.mobilesaude.dao.ServiceDao;
 import br.com.mobilesaude.resources.Requisicao;
@@ -38,14 +41,9 @@ public class Status_History {
 
 	private String primeiroDia;
 	private String url = new String();
-
-	@EJB
-	RequisicaoDao rdao;
-	@EJB
-	ServiceDao sdao;
-
+	DBConnection DB;
+	
 	public Status_History() {
-
 	}
 
 	public Status_History(long id, int n, String primeiroDia) {
@@ -58,19 +56,31 @@ public class Status_History {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-
+		DB = (DBConnection) lookup(null);
+		DB.setLists();
 		this.id = id;
 		img = new String[n];
 		dia = new int[n];
 		verifDias(id, n);
 
 		List<Service> services = new ArrayList<Service>();
-		services = sdao.getLista();
+		services = DB.getServices();
 		service = findService(id, services);
 
 		url = new String("services.xhtml?data=" + hoje);
 	}
 
+	public Object lookup(Class<?> clazz) {
+		InitialContext context;
+		try {
+			context = new InitialContext();
+			return context.lookup("java:global/Servicos_Saude/DBConnection");
+		} catch (NamingException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Erro na busca do EJB");
+		}
+	}
+	
 	Service findService(long id, List<Service> list) {
 		for (Service s : list) {
 			if (s.getId() == id) {
@@ -97,9 +107,7 @@ public class Status_History {
 		}
 
 		for (int i = 0; i < n; i++) {
-
 			String dayString = dataToString(diax);
-
 			int v = getOneDay(id, dayString);
 			dia[i] = v;
 			img[i] = new String();
@@ -141,8 +149,8 @@ public class Status_History {
 	}
 
 	public EstatisticasServicoDia getDay(String day, long id) {
-		List<Requisicao> list = rdao.getDay(day, id);
-		EstatisticasServicoDia EstatisticaDoDia = rdao.getEstatisticas(day, id, list.size());
+		List<Requisicao> list = DB.getListDay(day, id);
+		EstatisticasServicoDia EstatisticaDoDia = DB.getEstatisticaDoDia(list.size(), id, day);
 		EstatisticaDoDia.setRequisicoes(list);
 		return EstatisticaDoDia;
 	}
@@ -152,7 +160,6 @@ public class Status_History {
 	public int getOneDay(long id, String day) {
 		List<Requisicao> reqDia = new ArrayList<Requisicao>();
 		RequisicaoDao cr = new RequisicaoDao();
-		// reqDia = cr.getDay(id + "", day).getRequisicoes();
 		reqDia = getDay(day, id).getRequisicoes();
 
 		if (reqDia.size() > 0) {

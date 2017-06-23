@@ -11,6 +11,7 @@ import javax.faces.context.FacesContext;
 import javax.ws.rs.FormParam;
 import javax.xml.bind.JAXBException;
 
+import br.com.mobilesaude.connection.DBConnection;
 import br.com.mobilesaude.dao.RequisicaoDao;
 import br.com.mobilesaude.dao.ServiceDao;
 import br.com.mobilesaude.resources.EstatisticasServicoDia;
@@ -33,15 +34,10 @@ public class ServiceJSFBean extends RequisicaoJSFBean {
 	List<Service> services = new ArrayList<Service>();
 	EstatisticasServicoDia estatisticas = new EstatisticasServicoDia();
 
-	@EJB
-	RequisicaoDao rdao;
-	@EJB
-	ServiceDao sdao;
 
 	public ServiceJSFBean() {
-		
+
 		System.out.println(">>>>>>>>>>>>>>>>>>> ServiceJSFBean");
-		
 		setLists();
 		setUrlParameter();
 		setServiceHistoric(id, date);
@@ -49,28 +45,18 @@ public class ServiceJSFBean extends RequisicaoJSFBean {
 
 	public void setLists() {
 
-		// CRequisicao ch = new CRequisicao();
-		// CService cs = new CService();
-
-		allHistorics = rdao.getLista();
-		services = sdao.getLista();
-
+		services = DB.getServices();
+		allHistorics = DB.getAllHistorics();
 		for (int i = 0; i < services.size(); i++) {
 			lastHistorics.add(allHistorics.get(i));
 		}
 	}
 
 	public EstatisticasServicoDia getDay(String day, long id) {
-		List<Requisicao> list = rdao.getDay(day, id);
-		EstatisticasServicoDia EstatisticaDoDia = rdao.getEstatisticas(day, id, list.size());
-		EstatisticaDoDia.setRequisicoes(list);
-
-		return EstatisticaDoDia;
-
+		return DB.getDay(day, id);
 	}
 
 	public void setUrlParameter() {
-
 		FacesContext context = FacesContext.getCurrentInstance();
 		Map<String, String> paramMap = context.getExternalContext().getRequestParameterMap();
 		String projectId = paramMap.get("id");
@@ -78,7 +64,6 @@ public class ServiceJSFBean extends RequisicaoJSFBean {
 		date = paramMap.get("date");
 		estatisticas = getDay(date, id);
 		setarEstatisticas(estatisticas);
-
 	}
 
 	private void setarEstatisticas(EstatisticasServicoDia estatistica) {
@@ -148,20 +133,12 @@ public class ServiceJSFBean extends RequisicaoJSFBean {
 		this.estatisticas = estatisticas;
 	}
 
-	public RequisicaoDao getRdao() {
-		return rdao;
+	public DBConnection getDB() {
+		return DB;
 	}
 
-	public void setRdao(RequisicaoDao rdao) {
-		this.rdao = rdao;
-	}
-
-	public ServiceDao getSdao() {
-		return sdao;
-	}
-
-	public void setSdao(ServiceDao sdao) {
-		this.sdao = sdao;
+	public void setDB(DBConnection dB) {
+		DB = dB;
 	}
 
 }

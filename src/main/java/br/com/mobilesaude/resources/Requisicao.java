@@ -1,5 +1,7 @@
 package br.com.mobilesaude.resources;
 
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
@@ -26,6 +28,9 @@ public class Requisicao {
 	private int response;
 	private long requisicao;
 
+	private String dataBR;
+	private String timeString;
+	
 	public long getId() {
 		return id;
 	}
@@ -72,6 +77,36 @@ public class Requisicao {
 
 	public void setRequisicao(long requisicao) {
 		this.requisicao = requisicao;
+	}
+
+	public String dataToString(Date d) {
+		DateFormat df = new SimpleDateFormat("hh:mm:ss a");
+		String reportDate = df.format(d.getTime());
+		return reportDate;
+	}
+	
+	public String getTimeString() {
+		this.timeString = dataToString(time);
+		return timeString;
+	}
+
+	public void setTimeString(String timeString) {
+		this.timeString = timeString;
+	}
+	
+	public String dataBR(Date d) {
+		DateFormat df = new SimpleDateFormat("dd/MM/yy");
+		String reportDate = df.format(d.getTime());
+		return reportDate;
+	}
+
+	public String getDataBR() {
+		this.dataBR = dataBR(time);
+		return dataBR;
+	}
+
+	public void setDataBR(String dataBR) {
+		this.dataBR = dataBR;
 	}
 
 }

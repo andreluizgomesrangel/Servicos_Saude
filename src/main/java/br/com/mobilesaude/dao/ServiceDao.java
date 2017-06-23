@@ -10,13 +10,8 @@ import java.util.List;
 
 import javax.annotation.Resource;
 import javax.ejb.Stateless;
-import javax.inject.Inject;
-import javax.persistence.EntityManager;
-import javax.persistence.EntityManagerFactory;
-import javax.persistence.Persistence;
 import javax.sql.DataSource;
 
-import br.com.mobilesaude.connection.ConnectionFactory;
 import br.com.mobilesaude.resources.Service;
 
 @Stateless

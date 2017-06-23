@@ -8,9 +8,12 @@ import javax.ejb.EJB;
 import javax.faces.bean.ManagedBean;
 import javax.faces.bean.ViewScoped;
 import javax.faces.context.FacesContext;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 import javax.ws.rs.FormParam;
 import javax.xml.bind.JAXBException;
 
+import br.com.mobilesaude.connection.DBConnection;
 import br.com.mobilesaude.dao.RequisicaoDao;
 import br.com.mobilesaude.dao.ServiceDao;
 import br.com.mobilesaude.resources.EstatisticasServicoDia;
@@ -33,26 +36,32 @@ public class ServiceDayResponseBean extends RequisicaoJSFBean {
 	List<Service> services = new ArrayList<Service>();
 	EstatisticasServicoDia estatisticas = new EstatisticasServicoDia();
 
-	@EJB
-	RequisicaoDao rdao;
-	@EJB
-	ServiceDao sdao;
 	
 	public ServiceDayResponseBean() {
 		System.out.println(">>>>>>>>>>>>>>>>>>> ServiceDayResponseBean");
+		
+		//DB = (DBConnection) lookup(null);
 		
 		setLists();
 		setUrlParameter();
 		setServiceHistoric(id, date);
 	}
 
+	public Object lookup(Class<?> clazz) {
+		InitialContext context;
+		try {
+			context = new InitialContext();
+			return context.lookup("java:global/Servicos_Saude/DBConnection");
+		} catch (NamingException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Erro na busca do EJB");
+		}
+	}
+	
 	public void setLists() {
-
-		//CRequisicao ch = new CRequisicao();
-		//CService cs = new CService();
-
-		allHistorics = rdao.getLista();
-		services = sdao.getLista();
+		//DB.setLists();
+		allHistorics = DB.getAllHistorics();
+		services = DB.getServices();
 
 		for (int i = 0; i < services.size(); i++) {
 			lastHistorics.add(allHistorics.get(i));
@@ -60,8 +69,8 @@ public class ServiceDayResponseBean extends RequisicaoJSFBean {
 	}
 
 	public EstatisticasServicoDia getDayResponse(String day, long id, int response) {
-		List<Requisicao> list = rdao.getDayResponse(day, id, response);
-		EstatisticasServicoDia EstatisticaDoDia = rdao.getEstatisticas(day, id, list.size());
+		List<Requisicao> list = DB.getListDayRequest(response, id, day);
+		EstatisticasServicoDia EstatisticaDoDia = DB.getEstatisticaDoDia(list.size(), id, day);
 		EstatisticaDoDia.setRequisicoes(list);
 		return EstatisticaDoDia;
 	}
@@ -145,22 +154,6 @@ public class ServiceDayResponseBean extends RequisicaoJSFBean {
 
 	public void setEstatisticas(EstatisticasServicoDia estatisticas) {
 		this.estatisticas = estatisticas;
-	}
-
-	public RequisicaoDao getRdao() {
-		return rdao;
-	}
-
-	public void setRdao(RequisicaoDao rdao) {
-		this.rdao = rdao;
-	}
-
-	public ServiceDao getSdao() {
-		return sdao;
-	}
-
-	public void setSdao(ServiceDao sdao) {
-		this.sdao = sdao;
 	}
 
 }

@@ -9,24 +9,20 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import javax.ejb.EJB;
 import javax.faces.application.Application;
 import javax.faces.application.ViewHandler;
 import javax.faces.bean.ManagedBean;
-import javax.faces.bean.ViewScoped;
 import javax.faces.component.UIViewRoot;
 import javax.faces.context.FacesContext;
+import javax.naming.InitialContext;
+import javax.naming.NamingException;
 
-import br.com.mobilesaude.resources.EstatisticasServicoDia;
 import br.com.mobilesaude.resources.Requisicao;
 import br.com.mobilesaude.resources.Service;
 import br.com.mobilesaude.resources.Status_History;
-
-import br.com.mobilesaude.dao.RequisicaoDao;
-import br.com.mobilesaude.dao.ServiceDao;
+import br.com.mobilesaude.connection.DBConnection;
 
 @ManagedBean
-@ViewScoped
 public class RequisicaoJSFBean {
 
 	List<Requisicao> newHistorics = new ArrayList<Requisicao>();
@@ -37,7 +33,6 @@ public class RequisicaoJSFBean {
 	List<Requisicao> lastHour = new ArrayList<Requisicao>();
 	List<Status_History> status = new ArrayList<Status_History>();
 	List<Requisicao> serviceHistoric = new ArrayList<Requisicao>();
-	long serviceId = 7;
 	int qtdDias = 10;
 	String[] dias = new String[qtdDias];
 	String[] diasUS = new String[qtdDias];
@@ -60,15 +55,13 @@ public class RequisicaoJSFBean {
 	private String urlProx = new String();
 	private String urlAnt = new String();
 
-	@EJB
-	RequisicaoDao rdao;
-	@EJB
-	ServiceDao sdao;
+	DBConnection DB;
 
 	public RequisicaoJSFBean() {
 
 		System.out.println(">>>>>>>>>>>>>>>>>>> RequisicaoJSFBean");
-		
+
+		DB = (DBConnection) lookup(null);
 		offset = 0;
 		primeiroDia = Calendar.getInstance();
 		HOJE = primeiroDia;
@@ -77,15 +70,28 @@ public class RequisicaoJSFBean {
 		setUrlParameter(); // obter offset a partir da url // vera o offset ou
 
 		setDias(qtdDias); // ( v )
+		setListsConnection();
 		setLists();
-		qtdServices = services.size();
+
 		getDays();
 		setServicesInRequests();
-		// setServicesInAlert();
+	}
 
-		url = new String("primeiro dia: " + inicio + " causado pelo offset na url services.xhtml?data=" + offset);
-		urlProx = new String("prox dia: " + proximo + " causado pelo offset na url services.xhtml?data=10");
-		urlAnt = new String("anterior dia: " + anterior + " causado pelo offset na url services.xhtml?data=-10");
+	public Object lookup(Class<?> clazz) {
+		InitialContext context;
+		try {
+			context = new InitialContext();
+			return context.lookup("java:global/Servicos_Saude/DBConnection");
+		} catch (NamingException e) {
+			e.printStackTrace();
+			throw new RuntimeException("Erro na busca do EJB");
+		}
+	}
+
+	public void setListsConnection() {
+		this.allHistorics = DB.getAllHistorics();
+		this.services = DB.getServices();
+		this.qtdServices = services.size();
 	}
 
 	public void setdiainicial() {
@@ -101,7 +107,6 @@ public class RequisicaoJSFBean {
 	}
 
 	public void setUrlParameter() {
-		// System.out.println(">>>>> setando data inicial... ");
 		FacesContext context = FacesContext.getCurrentInstance();
 		Map<String, String> paramMap = context.getExternalContext().getRequestParameterMap();
 		String projectId = paramMap.get("inicio");
@@ -117,9 +122,7 @@ public class RequisicaoJSFBean {
 				SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
 				Calendar cal = Calendar.getInstance();
 				cal.setTime(sdf.parse(inicio));
-
 				primeiroDia = cal;
-
 			} catch (ParseException e) {
 				e.printStackTrace();
 			}
@@ -127,12 +130,9 @@ public class RequisicaoJSFBean {
 
 		String diadehoje = dataToStringBR1(HOJE);
 		proximoDia = setProxDia(inicio, 10, diadehoje);
-
 		proximo = dataToStringBR1(proximoDia);
 		antDia = setProxDia(inicio, -10, diadehoje);
-
 		anterior = dataToStringBR1(antDia);
-
 	}
 
 	public Calendar setProxDia(String Inicial, int offset, String diadehoje) {
@@ -144,10 +144,6 @@ public class RequisicaoJSFBean {
 		try {
 			inicial.setTime(sdf.parse(Inicial));
 			hoje.setTime(sdf.parse(diadehoje));
-
-			// System.out.println(">>>>>>>>>>>>>>>>>>>> hoje e inicial: " +
-			// hoje.toString() + " " + inicial.toString());
-
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -166,9 +162,7 @@ public class RequisicaoJSFBean {
 					return inicial;
 			inicial.add(Calendar.DATE, 1);
 		}
-
 		return inicial;
-
 	}
 
 	public void addOffset() {
@@ -197,14 +191,8 @@ public class RequisicaoJSFBean {
 
 	public void setLists() {
 
-		// CRequisicao ch = new CRequisicao();
-		// CService cs = new CService();
-
-		// allHistorics = ch.getList();
-		allHistorics = rdao.getLista();
-		// services = cs.getlistSortById();
-		services = sdao.getLista();
-
+		System.out.println(
+				">>>>>>>>> services.size():" + services.size() + "  allHistorics.size():" + allHistorics.size());
 		if (services.size() != 0) {
 			for (int i = 0; i < services.size(); i++) {
 				lastHistorics.add(allHistorics.get(i));
@@ -214,23 +202,11 @@ public class RequisicaoJSFBean {
 			for (int i = 0; i < services.size(); i++) {
 				for (int j = 0; j < qtdDias; j++) {
 					urlParam[j][i] = dataToString(diasUS[j], services.get(i).getId());
-					// System.out.print(" "+urlParam[j][i]);
-				} // System.out.println();
+				}
 			}
 		}
 
 	}
-
-	/*
-	 * public void setServicesInAlert() {
-	 * 
-	 * for (Service s : services) { if (s.isAlert() == true) { problems.add(s);
-	 * }
-	 * 
-	 * }
-	 * 
-	 * }
-	 */
 
 	public void setServicesInRequests() {
 
@@ -241,23 +217,23 @@ public class RequisicaoJSFBean {
 
 	}
 
-	public EstatisticasServicoDia getDay(String day, long id) {
-		List<Requisicao> list = rdao.getDay(day, id);
-		EstatisticasServicoDia EstatisticaDoDia = rdao.getEstatisticas(day, id, list.size());
-		EstatisticaDoDia.setRequisicoes(list);
-		return EstatisticaDoDia;
-	}
-
 	public void setServiceHistoric(long serviceId, String day) {
-		serviceHistoric = getDay(day, serviceId).getRequisicoes();
+		serviceHistoric = DB.getDay(day, serviceId).getRequisicoes();
 	}
 
 	// obter o status de cada service de no periodo de qtdDias
 	public void getDays() {
+		// System.out.println(">>>>>>>>>>>>>>>> qtdServices: "+qtdServices);
+		qtdServices = services.size();
+
 		for (int i = 0; i < qtdServices; i++) {
+			if (status.size() == qtdServices)
+				break;
 			Status_History s = new Status_History(services.get(i).getId(), qtdDias, inicio);
 			status.add(s);
 		}
+
+		System.out.println(">>>>>>>>>>>>>>>> Status.size: " + status.size());
 	}
 
 	public void setDias(int qtdDias) {
@@ -379,6 +355,7 @@ public class RequisicaoJSFBean {
 	}
 
 	public List<Status_History> getStatus() {
+		getDays();
 		return status;
 	}
 
@@ -418,14 +395,6 @@ public class RequisicaoJSFBean {
 		this.serviceHistoric = serviceHistoric;
 	}
 
-	public long getServiceId() {
-		return serviceId;
-	}
-
-	public void setServiceId(long serviceId) {
-		this.serviceId = serviceId;
-	}
-
 	public int getParametrourl() {
 		return parametrourl;
 	}
@@ -443,6 +412,7 @@ public class RequisicaoJSFBean {
 	}
 
 	public String getUrl() {
+		url = new String("primeiro dia: " + inicio + " causado pelo offset na url services.xhtml?data=" + offset);
 		return url;
 	}
 
@@ -499,6 +469,7 @@ public class RequisicaoJSFBean {
 	}
 
 	public String getUrlProx() {
+		urlProx = new String("prox dia: " + proximo + " causado pelo offset na url services.xhtml?data=10");
 		return urlProx;
 	}
 
@@ -515,6 +486,7 @@ public class RequisicaoJSFBean {
 	}
 
 	public String getUrlAnt() {
+		urlAnt = new String("anterior dia: " + anterior + " causado pelo offset na url services.xhtml?data=-10");
 		return urlAnt;
 	}
 
@@ -536,22 +508,6 @@ public class RequisicaoJSFBean {
 
 	public void setHOJE(Calendar hOJE) {
 		HOJE = hOJE;
-	}
-
-	public RequisicaoDao getRdao() {
-		return rdao;
-	}
-
-	public void setRdao(RequisicaoDao rdao) {
-		this.rdao = rdao;
-	}
-
-	public ServiceDao getSdao() {
-		return sdao;
-	}
-
-	public void setSdao(ServiceDao sdao) {
-		this.sdao = sdao;
 	}
 
 }
